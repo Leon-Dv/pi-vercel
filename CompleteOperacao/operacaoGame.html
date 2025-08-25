@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Complete a Operação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            touch-action: none;
+            overflow: hidden;
+        }
+        .number-option {
+            touch-action: none;
+            user-select: none;
+        }
+        .dragging {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.8;
+            transform: scale(1.2);
+        }
+        .drop-zone {
+            border: 3px dashed #a78bfa;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .drop-zone.over {
+            background-color: rgba(167, 139, 250, 0.3);
+            border-color: #c4b5fd;
+        }
+        .feedback-animation, .combo-animation {
+            animation: feedback-pop 0.5s ease-out;
+        }
+        @keyframes feedback-pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .timer-bar-inner {
+            transition: width 0.2s linear;
+        }
+        .level-indicator {
+            transition: all 0.3s ease-in-out;
+        }
+        /* Estilos para Notificação de Medalha */
+        #medal-toast {
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            transform: translateX(120%);
+            opacity: 0;
+        }
+        #medal-toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-400 to-teal-500 min-h-screen flex items-center justify-center p-4">
+
+    <div id="game-container" class="w-full max-w-3xl mx-auto bg-white/20 backdrop-blur-lg rounded-2xl shadow-2xl p-6 md:p-8 text-white text-center">
+        
+        <h1 class="text-3xl md:text-4xl font-bold mb-2">Complete a Operação</h1>
+        <p class="text-lg mb-4">Arraste o número correto para completar a conta.</p>
+
+        <!-- Timer -->
+        <div class="w-full bg-gray-700/50 rounded-full h-6 mb-6 overflow-hidden border-2 border-white/30">
+            <div id="timer-bar" class="bg-yellow-400 h-full rounded-full timer-bar-inner"></div>
+        </div>
+
+        <!-- Score and Level -->
+        <div class="absolute top-4 right-4 flex flex-col items-end space-y-2">
+            <div class="bg-purple-600 px-4 py-2 rounded-xl shadow-lg">
+                <span class="font-bold text-xl">Pontos: <span id="score">0</span></span>
+            </div>
+            <div id="level-indicator" class="level-indicator bg-blue-500 px-4 py-2 rounded-xl shadow-lg">
+                <span class="font-bold text-xl">Nível: <span id="level">1</span></span>
+            </div>
+        </div>
+
+        <!-- Operation -->
+        <div id="operation-container" class="flex items-center justify-center space-x-2 md:space-x-4 my-10 h-24 text-4xl md:text-6xl font-bold"></div>
+
+        <!-- Number Options -->
+        <div id="options-container" class="flex flex-wrap items-center justify-center gap-4 md:gap-6 mt-8 min-h-[80px]"></div>
+
+        <!-- Feedback and Combo Messages -->
+        <div class="h-20">
+            <div id="feedback-message" class="text-3xl font-bold h-10"></div>
+            <div id="combo-indicator" class="text-2xl font-bold h-10 text-yellow-300"></div>
+        </div>
+
+        <!-- Game Over Modal -->
+        <div id="game-over-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div class="bg-white text-gray-800 p-8 rounded-2xl shadow-xl text-center max-w-lg w-full">
+                <h2 class="text-4xl font-bold mb-4">Fim de Jogo!</h2>
+                <p class="text-xl mb-2">Sua pontuação final foi: <strong id="final-score" class="text-purple-600">0</strong></p>
+                <p class="text-xl mb-4">Você alcançou o nível: <strong id="final-level" class="text-blue-500">1</strong></p>
+                
+                <h3 class="text-2xl font-semibold mb-3">Medalhas Conquistadas</h3>
+                <div id="final-medals" class="flex flex-wrap justify-center gap-4 mb-6">
+                    <!-- Medalhas desbloqueadas aparecerão aqui -->
+                </div>
+
+                <button id="restart-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg text-xl transition-transform transform hover:scale-105">
+                    Jogar Novamente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificação de Medalha (Toast) -->
+    <div id="medal-toast" class="fixed bottom-5 right-5 bg-yellow-400 text-gray-800 p-4 rounded-xl shadow-lg flex items-center gap-4">
+        <span class="text-3xl">🏆</span>
+        <div>
+            <h4 class="font-bold">Nova Medalha!</h4>
+            <p id="toast-medal-name"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elementos do DOM
+            const scoreEl = document.getElementById('score');
+            const levelEl = document.getElementById('level');
+            const levelIndicator = document.getElementById('level-indicator');
+            const operationContainer = document.getElementById('operation-container');
+            const optionsContainer = document.getElementById('options-container');
+            const feedbackMessage = document.getElementById('feedback-message');
+            const comboIndicator = document.getElementById('combo-indicator');
+            const timerBar = document.getElementById('timer-bar');
+            const gameOverModal = document.getElementById('game-over-modal');
+            const finalScoreEl = document.getElementById('final-score');
+            const finalLevelEl = document.getElementById('final-level');
+            const finalMedalsContainer = document.getElementById('final-medals');
+            const restartButton = document.getElementById('restart-button');
+            const medalToast = document.getElementById('medal-toast');
+            const toastMedalName = document.getElementById('toast-medal-name');
+
+            // Definição das Medalhas
+            const medals = {
+                'level2': { name: 'Iniciante na Soma', unlocked: false, icon: '➕' },
+                'level3': { name: 'Mestre da Adição', unlocked: false, icon: '🎓' },
+                'level4': { name: 'Rei da Subtração', unlocked: false, icon: '➖' },
+                'level5': { name: 'Multiplicador Mestre', unlocked: false, icon: '✖️' },
+                'level6': { name: 'Gênio dos Cálculos', unlocked: false, icon: '🧠' },
+                'combo5': { name: 'Combo de 5x', unlocked: false, icon: '🔥' },
+                'velocista': { name: 'Velocista Matemático', unlocked: false, icon: '⚡️' } // 10 pontos em 30s
+            };
+
+            // Estado do Jogo
+            let score = 0;
+            let level = 1;
+            let comboCounter = 0;
+            let correctAnswer = null;
+            let timerInterval;
+            let gameTime = 0;
+            const MAX_TIME = 20;
+            let timeLeft = MAX_TIME;
+            const POINTS_PER_LEVEL = 5;
+            const COMBO_THRESHOLD = 3;
+            
+            // --- Lógica de Arrastar e Soltar ---
+            let draggedItem = null;
+            let initialX, initialY, offsetX, offsetY;
+
+            function onDragStart(e) {
+                draggedItem = this;
+                if (e.type === 'touchstart') {
+                    initialX = e.touches[0].clientX; initialY = e.touches[0].clientY;
+                } else {
+                    initialX = e.clientX; initialY = e.clientY;
+                }
+                const rect = draggedItem.getBoundingClientRect();
+                offsetX = initialX - rect.left; offsetY = initialY - rect.top;
+                draggedItem.style.opacity = '0.5';
+                const clone = draggedItem.cloneNode(true);
+                clone.id = 'dragged-clone';
+                clone.classList.add('dragging');
+                document.body.appendChild(clone);
+                clone.style.left = `${rect.left}px`; clone.style.top = `${rect.top}px`;
+                document.addEventListener('mousemove', onDragMove);
+                document.addEventListener('touchmove', onDragMove);
+                document.addEventListener('mouseup', onDragEnd);
+                document.addEventListener('touchend', onDragEnd);
+            }
+
+            function onDragMove(e) {
+                if (!draggedItem) return;
+                e.preventDefault();
+                let currentX, currentY;
+                if (e.type === 'touchmove') {
+                    currentX = e.touches[0].clientX; currentY = e.touches[0].clientY;
+                } else {
+                    currentX = e.clientX; currentY = e.clientY;
+                }
+                const clone = document.getElementById('dragged-clone');
+                if(!clone) return;
+                clone.style.left = `${currentX - offsetX}px`; clone.style.top = `${currentY - offsetY}px`;
+                const dropZone = document.getElementById('drop-zone');
+                const elementUnder = document.elementFromPoint(currentX, currentY);
+                if (elementUnder === dropZone) {
+                    dropZone.classList.add('over');
+                } else {
+                    dropZone.classList.remove('over');
+                }
+            }
+
+            function onDragEnd(e) {
+                if (!draggedItem) return;
+                const clone = document.getElementById('dragged-clone');
+                const dropZone = document.getElementById('drop-zone');
+                let endX, endY;
+                 if (e.type === 'touchend') {
+                    endX = e.changedTouches[0].clientX; endY = e.changedTouches[0].clientY;
+                } else {
+                    endX = e.clientX; endY = e.clientY;
+                }
+                const elementUnder = document.elementFromPoint(endX, endY);
+                dropZone.classList.remove('over');
+                if (elementUnder === dropZone) {
+                    handleDrop();
+                } else {
+                    draggedItem.style.opacity = '1';
+                }
+                if (clone) clone.remove();
+                draggedItem = null;
+                document.removeEventListener('mousemove', onDragMove);
+                document.removeEventListener('touchmove', onDragMove);
+                document.removeEventListener('mouseup', onDragEnd);
+                document.removeEventListener('touchend', onDragEnd);
+            }
+
+            function handleDrop() {
+                const droppedValue = parseInt(draggedItem.dataset.value);
+                if (droppedValue === correctAnswer) {
+                    score++;
+                    comboCounter++;
+                    showFeedback('Correto!', 'text-green-400');
+                    updateTimer(5);
+                    if (comboCounter >= 2 && comboCounter % COMBO_THRESHOLD === 0) {
+                        score += 5;
+                        updateTimer(5);
+                        showComboBonus();
+                    }
+                    updateScoreAndLevel();
+                    updateComboIndicator();
+                    checkMedals();
+                    optionsContainer.innerHTML = '';
+                    setTimeout(nextRound, 1500);
+                } else {
+                    showFeedback('Incorreto!', 'text-red-400');
+                    updateTimer(-5);
+                    comboCounter = 0;
+                    updateComboIndicator();
+                    draggedItem.style.opacity = '1';
+                }
+            }
+
+            // --- Lógica do Jogo ---
+
+            function generateProblem() {
+                operationContainer.innerHTML = '';
+                let num1, num2, result, operator;
+                const blankPosition = Math.floor(Math.random() * 3);
+                if (level === 1) { operator = '+'; num1 = Math.floor(Math.random() * 10) + 1; num2 = Math.floor(Math.random() * 10) + 1; result = num1 + num2; } 
+                else if (level === 2) { operator = '-'; result = Math.floor(Math.random() * 10) + 1; num2 = Math.floor(Math.random() * 10) + 1; num1 = result + num2; }
+                else if (level === 3) { operator = '×'; num1 = Math.floor(Math.random() * 8) + 2; num2 = Math.floor(Math.random() * 8) + 2; result = num1 * num2; }
+                else if (level === 4) { operator = '÷'; num2 = Math.floor(Math.random() * 8) + 2; result = Math.floor(Math.random() * 8) + 2; num1 = num2 * result; }
+                else {
+                    const randomOp = Math.floor(Math.random() * 4);
+                    if (randomOp === 0) { operator = '+'; num1 = Math.floor(Math.random() * 15) + 1; num2 = Math.floor(Math.random() * 15) + 1; result = num1 + num2; } 
+                    else if (randomOp === 1) { operator = '-'; result = Math.floor(Math.random() * 15) + 1; num2 = Math.floor(Math.random() * 15) + 1; num1 = result + num2; } 
+                    else if (randomOp === 2) { operator = '×'; num1 = Math.floor(Math.random() * 10) + 2; num2 = Math.floor(Math.random() * 10) + 2; result = num1 * num2; } 
+                    else { operator = '÷'; num2 = Math.floor(Math.random() * 9) + 2; result = Math.floor(Math.random() * 9) + 2; num1 = num2 * result; }
+                }
+                if (blankPosition === 0) {
+                    correctAnswer = num1; createDropZone(); operationContainer.innerHTML += `<span>${operator}</span><span>${num2}</span><span>=</span><span>${result}</span>`;
+                } else if (blankPosition === 1 && operator !== '÷') {
+                    correctAnswer = num2; operationContainer.innerHTML += `<span>${num1}</span><span>${operator}</span>`; createDropZone(); operationContainer.innerHTML += `<span>=</span><span>${result}</span>`;
+                } else {
+                    correctAnswer = result; operationContainer.innerHTML += `<span>${num1}</span><span>${operator}</span><span>${num2}</span><span>=</span>`; createDropZone();
+                }
+            }
+            
+            function createDropZone() {
+                const dropZone = document.createElement('div');
+                dropZone.id = 'drop-zone';
+                dropZone.className = 'drop-zone w-20 h-20 md:w-28 md:h-28 rounded-lg flex items-center justify-center text-4xl';
+                operationContainer.appendChild(dropZone);
+            }
+
+            function generateOptions() {
+                const options = new Set([correctAnswer]);
+                while (options.size < 4) {
+                    const offset = Math.floor(Math.random() * 10) - 5;
+                    let randomNum = correctAnswer + offset;
+                    if (randomNum <= 0) randomNum = Math.abs(randomNum) + 1;
+                    options.add(randomNum);
+                }
+                const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+                optionsContainer.innerHTML = '';
+                shuffledOptions.forEach(num => {
+                    const optionEl = document.createElement('div');
+                    optionEl.className = 'number-option bg-purple-500 hover:bg-purple-600 cursor-grab active:cursor-grabbing w-20 h-20 md:w-24 md:h-24 rounded-lg flex items-center justify-center text-3xl md:text-4xl font-bold shadow-lg transition-transform transform hover:scale-110';
+                    optionEl.dataset.value = num;
+                    optionEl.textContent = num;
+                    optionEl.addEventListener('mousedown', onDragStart);
+                    optionEl.addEventListener('touchstart', onDragStart);
+                    optionsContainer.appendChild(optionEl);
+                });
+            }
+
+            function updateScoreAndLevel() {
+                scoreEl.textContent = score;
+                const newLevel = Math.floor(score / POINTS_PER_LEVEL) + 1;
+                if (newLevel > level) {
+                    level = newLevel;
+                    levelEl.textContent = level;
+                    levelIndicator.classList.add('transform', 'scale-125', 'bg-yellow-400');
+                    setTimeout(() => {
+                        levelIndicator.classList.remove('transform', 'scale-125', 'bg-yellow-400');
+                    }, 500);
+                }
+            }
+
+            function showFeedback(message, colorClass) {
+                feedbackMessage.textContent = message;
+                feedbackMessage.className = `text-3xl font-bold h-10 feedback-animation ${colorClass}`;
+                setTimeout(() => feedbackMessage.textContent = '', 1500);
+            }
+            
+            function updateComboIndicator() {
+                if (comboCounter > 1) {
+                    comboIndicator.textContent = `Combo x${comboCounter}!`;
+                    comboIndicator.classList.add('combo-animation');
+                    setTimeout(() => comboIndicator.classList.remove('combo-animation'), 500);
+                } else {
+                    comboIndicator.textContent = '';
+                }
+            }
+            
+            function showComboBonus() {
+                feedbackMessage.textContent = 'BÔNUS DE COMBO!';
+                feedbackMessage.className = 'text-3xl font-bold h-10 feedback-animation text-cyan-300';
+            }
+
+            function nextRound() {
+                feedbackMessage.textContent = '';
+                generateProblem();
+                generateOptions();
+            }
+
+            function startTimer() {
+                timeLeft = MAX_TIME;
+                gameTime = 0;
+                clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    updateTimer(-0.1);
+                    gameTime += 0.1;
+                    checkMedals(); // Verifica medalhas baseadas no tempo
+                }, 100);
+            }
+
+            function updateTimer(change) {
+                if (change) timeLeft += change;
+                if (timeLeft <= 0) { timeLeft = 0; gameOver(); }
+                if (timeLeft > MAX_TIME) timeLeft = MAX_TIME;
+                const percentage = (timeLeft / MAX_TIME) * 100;
+                timerBar.style.width = `${percentage}%`;
+                if (percentage < 25) timerBar.className = 'bg-red-500 h-full rounded-full timer-bar-inner';
+                else if (percentage < 50) timerBar.className = 'bg-orange-400 h-full rounded-full timer-bar-inner';
+                else timerBar.className = 'bg-yellow-400 h-full rounded-full timer-bar-inner';
+            }
+
+            // --- Lógica das Medalhas ---
+            function checkMedals() {
+                if (level >= 2 && !medals.level2.unlocked) unlockMedal('level2');
+                if (level >= 3 && !medals.level3.unlocked) unlockMedal('level3');
+                if (level >= 4 && !medals.level4.unlocked) unlockMedal('level4');
+                if (level >= 5 && !medals.level5.unlocked) unlockMedal('level5');
+                if (level >= 6 && !medals.level6.unlocked) unlockMedal('level6');
+                if (comboCounter >= 5 && !medals.combo5.unlocked) unlockMedal('combo5');
+                if (score >= 10 && gameTime <= 30 && !medals.velocista.unlocked) unlockMedal('velocista');
+            }
+
+            function unlockMedal(key) {
+                medals[key].unlocked = true;
+                toastMedalName.textContent = medals[key].name;
+                medalToast.classList.add('show');
+                setTimeout(() => {
+                    medalToast.classList.remove('show');
+                }, 3000);
+            }
+
+            function resetMedals() {
+                for (const key in medals) {
+                    medals[key].unlocked = false;
+                }
+            }
+
+            function displayFinalMedals() {
+                finalMedalsContainer.innerHTML = '';
+                let unlockedCount = 0;
+                for (const key in medals) {
+                    if (medals[key].unlocked) {
+                        unlockedCount++;
+                        const medalEl = document.createElement('div');
+                        medalEl.className = 'bg-gray-200 p-2 rounded-lg text-center';
+                        medalEl.innerHTML = `
+                            <span class="text-3xl">${medals[key].icon}</span>
+                            <p class="text-xs font-semibold">${medals[key].name}</p>
+                        `;
+                        finalMedalsContainer.appendChild(medalEl);
+                    }
+                }
+                if (unlockedCount === 0) {
+                    finalMedalsContainer.innerHTML = '<p class="text-gray-500">Nenhuma medalha nesta partida.</p>';
+                }
+            }
+
+            function gameOver() {
+                clearInterval(timerInterval);
+                finalScoreEl.textContent = score;
+                finalLevelEl.textContent = level;
+                displayFinalMedals();
+                gameOverModal.classList.remove('hidden');
+            }
+
+            function startGame() {
+                score = 0;
+                level = 1;
+                comboCounter = 0;
+                resetMedals();
+                updateScoreAndLevel();
+                updateComboIndicator();
+                levelEl.textContent = level;
+                gameOverModal.classList.add('hidden');
+                nextRound();
+                startTimer();
+            }
+            
+            restartButton.addEventListener('click', startGame);
+
+            startGame();
+        });
+    </script>
+</body>
+</html>
