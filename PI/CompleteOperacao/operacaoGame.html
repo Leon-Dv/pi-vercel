@@ -62,8 +62,18 @@
 </head>
 <body class="bg-gradient-to-br from-green-400 to-teal-500 min-h-screen flex items-center justify-center p-4">
 
-    <div id="game-container" class="w-full max-w-3xl mx-auto bg-white/20 backdrop-blur-lg rounded-2xl shadow-2xl p-6 md:p-8 text-white text-center">
-        
+    <!-- Tela Inicial -->
+    <div id="start-screen" class="w-full max-w-3xl mx-auto bg-white/20 backdrop-blur-lg rounded-2xl shadow-2xl p-6 md:p-8 text-white text-center flex flex-col items-center justify-center">
+        <h1 class="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">Complete a Operação</h1>
+        <p class="text-xl mb-8">Teste suas habilidades matemáticas em um desafio contra o tempo!</p>
+        <div class="flex flex-col md:flex-row gap-4 justify-center">
+            <button id="start-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg text-xl transition-transform transform hover:scale-105 shadow-lg">Iniciar Jogo</button>
+            <button id="how-to-play-button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-xl transition-transform transform hover:scale-105 shadow-lg">Como Jogar</button>
+        </div>
+    </div>
+
+    <!-- Tela do Jogo (Oculta) -->
+    <div id="game-container" class="hidden w-full max-w-3xl mx-auto bg-white/20 backdrop-blur-lg rounded-2xl shadow-2xl p-6 md:p-8 text-white text-center">
         <h1 class="text-3xl md:text-4xl font-bold mb-2">Complete a Operação</h1>
         <p class="text-lg mb-4">Arraste o número correto para completar a conta.</p>
 
@@ -93,28 +103,49 @@
             <div id="feedback-message" class="text-3xl font-bold h-10"></div>
             <div id="combo-indicator" class="text-2xl font-bold h-10 text-yellow-300"></div>
         </div>
+    </div>
+    
+    <!-- Modal "Como Jogar" (Oculto) -->
+    <div id="how-to-play-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white text-gray-800 p-8 rounded-2xl shadow-xl text-center max-w-lg w-full">
+            <h2 class="text-3xl font-bold mb-4">Como Jogar</h2>
+            <ul class="text-left text-lg space-y-3 mb-6 list-disc list-inside">
+                <li>Observe a operação matemática na tela.</li>
+                <li>Arraste o número colorido correto para o espaço vazio.</li>
+                <li>Acerte para ganhar pontos e <strong>+5 segundos</strong>. Erre e perca <strong>5 segundos</strong>.</li>
+                <li>Acerte 3 vezes seguidas para um <strong>bônus de combo</strong> em pontos e tempo!</li>
+                <li>Suba de nível a cada 5 pontos e desbloqueie medalhas por suas conquistas!</li>
+            </ul>
+            <button id="close-how-to-play-button" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-6 rounded-lg text-lg transition-transform transform hover:scale-105">Entendi!</button>
+        </div>
+    </div>
 
-        <!-- Game Over Modal -->
-        <div id="game-over-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div class="bg-white text-gray-800 p-8 rounded-2xl shadow-xl text-center max-w-lg w-full">
-                <h2 class="text-4xl font-bold mb-4">Fim de Jogo!</h2>
-                <p class="text-xl mb-2">Sua pontuação final foi: <strong id="final-score" class="text-purple-600">0</strong></p>
-                <p class="text-xl mb-4">Você alcançou o nível: <strong id="final-level" class="text-blue-500">1</strong></p>
-                
-                <h3 class="text-2xl font-semibold mb-3">Medalhas Conquistadas</h3>
-                <div id="final-medals" class="flex flex-wrap justify-center gap-4 mb-6">
-                    <!-- Medalhas desbloqueadas aparecerão aqui -->
-                </div>
 
-                <button id="restart-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg text-xl transition-transform transform hover:scale-105">
-                    Jogar Novamente
+    <!-- Game Over Modal -->
+    <div id="game-over-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white text-gray-800 p-8 rounded-2xl shadow-xl text-center max-w-lg w-full">
+            <h2 class="text-4xl font-bold mb-4">Fim de Jogo!</h2>
+            <p class="text-xl mb-2">Sua pontuação final foi: <strong id="final-score" class="text-purple-600">0</strong></p>
+            <p class="text-xl mb-4">Você alcançou o nível: <strong id="final-level" class="text-blue-500">1</strong></p>
+            
+            <h3 class="text-2xl font-semibold mb-3">Medalhas Conquistadas</h3>
+            <div id="final-medals" class="flex flex-wrap justify-center gap-4 mb-6">
+                <!-- Medalhas desbloqueadas aparecerão aqui -->
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-4 justify-center mt-6">
+                <button id="restart-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg text-xl transition-transform transform hover:scale-105 shadow-lg">
+                    Voltar ao Início
                 </button>
+                <a href="https://forms.gle/puXe79khhiso7UJfA" target="_blank" rel="noopener noreferrer" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-lg text-xl transition-transform transform hover:scale-105 shadow-lg inline-flex items-center justify-center">
+                    Dar Feedback
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Notificação de Medalha (Toast) -->
-    <div id="medal-toast" class="fixed bottom-5 right-5 bg-yellow-400 text-gray-800 p-4 rounded-xl shadow-lg flex items-center gap-4">
+    <div id="medal-toast" class="fixed bottom-5 right-5 bg-yellow-400 text-gray-800 p-4 rounded-xl shadow-lg flex items-center gap-4 z-[1001]">
         <span class="text-3xl">🏆</span>
         <div>
             <h4 class="font-bold">Nova Medalha!</h4>
@@ -125,6 +156,12 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Elementos do DOM
+            const startScreen = document.getElementById('start-screen');
+            const startButton = document.getElementById('start-button');
+            const howToPlayButton = document.getElementById('how-to-play-button');
+            const howToPlayModal = document.getElementById('how-to-play-modal');
+            const closeHowToPlayButton = document.getElementById('close-how-to-play-button');
+            const gameContainer = document.getElementById('game-container');
             const scoreEl = document.getElementById('score');
             const levelEl = document.getElementById('level');
             const levelIndicator = document.getElementById('level-indicator');
@@ -444,10 +481,28 @@
                 startTimer();
             }
             
-            restartButton.addEventListener('click', startGame);
+            // --- Event Listeners da Tela Inicial ---
+            startButton.addEventListener('click', () => {
+                startScreen.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                startGame();
+            });
 
-            startGame();
+            howToPlayButton.addEventListener('click', () => {
+                howToPlayModal.classList.remove('hidden');
+            });
+
+            closeHowToPlayButton.addEventListener('click', () => {
+                howToPlayModal.classList.add('hidden');
+            });
+
+            restartButton.addEventListener('click', () => {
+                gameOverModal.classList.add('hidden');
+                gameContainer.classList.add('hidden');
+                startScreen.classList.remove('hidden');
+            });
         });
     </script>
 </body>
 </html>
+```eof

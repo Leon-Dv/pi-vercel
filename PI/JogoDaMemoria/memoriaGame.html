@@ -77,6 +77,12 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+        .board-section {
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white flex flex-col items-center justify-center min-h-screen p-2 sm:p-4">
@@ -97,34 +103,54 @@
             <div id="time-frozen-text" class="absolute inset-0 flex justify-center items-center text-xs font-bold text-black hidden">CONGELADO</div>
         </div>
 
-        <main id="game-board" class="grid gap-2 sm:gap-3 mb-4 relative">
-            <!-- As cartas serão inseridas aqui -->
+        <main class="mb-4 relative">
+            <div id="operations-board" class="board-section grid gap-1 sm:gap-2 md:gap-3 mb-4">
+                </div>
+            <div id="answers-board" class="board-section grid gap-1 sm:gap-2 md:gap-3">
+                </div>
             <div id="reveal-overlay" class="absolute inset-0 bg-black bg-opacity-60 flex justify-center items-center hidden z-10 rounded-xl">
-                <h2 id="reveal-overlay-text" class="text-7xl sm:text-9xl font-black text-white" style="text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);"></h2>
+                <h2 id="reveal-overlay-text" class="text-6xl sm:text-8xl md:text-9xl font-black text-white" style="text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);"></h2>
             </div>
         </main>
 
-        <footer class="flex justify-center items-center space-x-2 sm:space-x-4">
-            <button id="main-menu-btn" class="px-3 py-2 sm:px-6 sm:py-3 bg-gray-600 hover:bg-gray-700 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105">Menu</button>
-             <!-- Botões de Poder -->
-            <button id="power-reveal-btn" class="px-3 py-2 sm:px-4 sm:py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        <footer class="flex flex-wrap justify-center items-center gap-2 sm:gap-4">
+            <button id="main-menu-btn" class="px-4 py-2 sm:px-6 sm:py-3 bg-gray-600 hover:bg-gray-700 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105">Menu</button>
+             <button id="power-reveal-btn" class="px-3 py-2 sm:px-4 sm:py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105 flex items-center text-sm sm:text-base">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 <span class="ml-2">Revelar (<span id="reveal-count">0</span>)</span>
             </button>
-            <button id="power-freeze-btn" class="px-3 py-2 sm:px-4 sm:py-3 bg-sky-500 hover:bg-sky-600 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path><path d="M10 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path><path d="M4 14h16"></path></svg>
+            <button id="power-freeze-btn" class="px-3 py-2 sm:px-4 sm:py-3 bg-sky-500 hover:bg-sky-600 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105 flex items-center text-sm sm:text-base">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path><path d="M10 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path><path d="M4 14h16"></path></svg>
                 <span class="ml-2">Congelar (<span id="freeze-count">0</span>)</span>
             </button>
-            <button id="restart-btn" class="px-3 py-2 sm:px-6 sm:py-3 bg-rose-600 hover:bg-rose-700 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105">Reiniciar</button>
+            <button id="restart-btn" class="px-4 py-2 sm:px-6 sm:py-3 bg-rose-600 hover:bg-rose-700 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105">Reiniciar</button>
         </footer>
     </div>
 
     <div id="start-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-20">
-        <div id="modal-content" class="bg-slate-800 rounded-2xl shadow-2xl p-8 text-center max-w-md w-full">
+        <div id="modal-content" class="bg-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 text-center max-w-md w-full">
             <h2 id="modal-title" class="text-3xl font-bold mb-2 text-slate-200">Memória Matemática</h2>
-            <p class="text-slate-400 mb-6">Teste sua mente e seus cálculos em uma jornada de níveis progressivos.</p>
-            <div id="modal-body" class="space-y-4">
-                <button id="start-game-btn" class="w-full text-lg px-6 py-4 bg-green-500 hover:bg-green-600 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105">Iniciar Jogo</button>
+            <div id="modal-body">
+                <div id="main-menu-view">
+                    <p class="text-slate-400 mb-6">Teste sua mente e seus cálculos em uma jornada de níveis progressivos.</p>
+                    <div class="space-y-4">
+                        <button id="start-game-btn" class="w-full text-lg px-6 py-4 bg-green-500 hover:bg-green-600 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105">Iniciar Jogo</button>
+                        <button id="how-to-play-btn" class="w-full text-lg px-6 py-4 bg-sky-600 hover:bg-sky-700 rounded-lg font-semibold shadow-md transition-transform transform hover:scale-105">Como Jogar</button>
+                    </div>
+                </div>
+                <div id="instructions-view" class="hidden">
+                    <div class="text-left space-y-3 text-slate-300 text-sm sm:text-base">
+                        <p><strong>- Objetivo:</strong> Encontre todos os pares combinando uma carta de operação (no topo) com sua resposta correta (embaixo).</p>
+                        <p><strong>- Pontos:</strong> Cada par correto vale pontos. Acerte em sequência para ativar o multiplicador de <strong>Combo</strong> e ganhar ainda mais!</p>
+                        <p><strong>- Tempo:</strong> Fique de olho na barra de tempo! Se ela chegar ao fim, o jogo acaba.</p>
+                        <p><strong>- Poderes:</strong></p>
+                        <ul class="list-disc list-inside ml-4 space-y-2">
+                            <li><span class="inline-flex items-center"><strong>Revelar:</strong><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-1"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Vira todas as cartas restantes no tabuleiro por 3 segundos.</span></li>
+                            <li><span class="inline-flex items-center"><strong>Congelar:</strong><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-1"><path d="M20 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path><path d="M10 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path><path d="M4 14h16"></path></svg> Pausa o tempo por 5 segundos para você poder pensar.</span></li>
+                        </ul>
+                    </div>
+                    <button id="back-to-menu-btn" class="w-full text-lg mt-6 px-6 py-4 bg-gray-600 hover:bg-gray-700 rounded-lg font-semibold shadow-md">Voltar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -134,11 +160,16 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- ELEMENTOS DO DOM ---
-            const gameBoard = document.getElementById('game-board');
+            const operationsBoard = document.getElementById('operations-board');
+            const answersBoard = document.getElementById('answers-board');
             const startModal = document.getElementById('start-modal');
             const modalTitle = document.getElementById('modal-title');
             const modalBody = document.getElementById('modal-body');
+            const mainMenuView = document.getElementById('main-menu-view');
+            const instructionsView = document.getElementById('instructions-view');
             const startGameBtn = document.getElementById('start-game-btn');
+            const howToPlayBtn = document.getElementById('how-to-play-btn');
+            const backToMenuBtn = document.getElementById('back-to-menu-btn');
             const gameContainer = document.getElementById('game-container');
             const headerTitle = document.getElementById('header-title');
             const scoreDisplay = document.getElementById('score-display');
@@ -167,7 +198,7 @@
 
             // --- ESTADO DO JOGO ---
             let currentLevel = 0;
-            let flippedCards = [];
+            let flippedCards = []; // Max 2 cards at a time
             let matchedPairs = 0;
             let moves = 0;
             let score = 0;
@@ -197,6 +228,16 @@
                 }
                 return pairs;
             }
+            
+            // --- FUNÇÕES DE LAYOUT RESPONSIVO ---
+            function getGridCols(pairCount) {
+                if (pairCount <= 4) return 'grid-cols-4';
+                if (pairCount <= 6) return 'grid-cols-3 sm:grid-cols-6';
+                if (pairCount <= 8) return 'grid-cols-4';
+                if (pairCount <= 10) return 'grid-cols-5';
+                if (pairCount <= 12) return 'grid-cols-4 sm:grid-cols-6';
+                return 'grid-cols-4 sm:grid-cols-6';
+            }
 
             // --- FUNÇÕES PRINCIPAIS DO JOGO ---
             function startGame(levelIndex) {
@@ -213,11 +254,7 @@
                 headerTitle.textContent = `Nível ${levelIndex + 1}`;
                 
                 const pairs = generatePairs(levelData.pairs, levelData.ops);
-                const cardValues = [];
-                pairs.forEach(pair => cardValues.push(pair.q, pair.a));
-                cardValues.sort(() => Math.random() - 0.5);
-
-                setupGameBoard(cardValues);
+                setupGameBoard(pairs);
                 
                 startModal.classList.add('hidden');
                 gameContainer.classList.remove('hidden');
@@ -225,14 +262,28 @@
                 revealCardsInitially();
             }
 
-            function setupGameBoard(cardValues) {
-                gameBoard.innerHTML = '';
-                let cols = 4;
-                if (cardValues.length > 12) cols = 5;
-                if (cardValues.length > 20) cols = 6;
-                gameBoard.className = `grid grid-cols-${cols} gap-2 sm:gap-3 mb-4 relative`;
-                cardValues.forEach(value => gameBoard.appendChild(createCardElement(value, cardValues.length)));
-                gameBoard.appendChild(revealOverlay);
+            function setupGameBoard(pairs) {
+                operationsBoard.innerHTML = '';
+                answersBoard.innerHTML = '';
+
+                const operationValues = pairs.map(p => p.q);
+                const answerValues = pairs.map(p => p.a);
+
+                operationValues.sort(() => Math.random() - 0.5);
+                answerValues.sort(() => Math.random() - 0.5);
+
+                const gridClasses = getGridCols(pairs.length);
+                operationsBoard.className = `board-section grid ${gridClasses} gap-1 sm:gap-2 md:gap-3 mb-4 relative`;
+                answersBoard.className = `board-section grid ${gridClasses} gap-1 sm:gap-2 md:gap-3 relative`;
+
+
+                operationValues.forEach(value => {
+                    operationsBoard.appendChild(createCardElement(value, 'operation'));
+                });
+                answerValues.forEach(value => {
+                    answersBoard.appendChild(createCardElement(value, 'answer'));
+                });
+                operationsBoard.appendChild(revealOverlay); // Add overlay to cover both sections
             }
 
             function resetGameState() {
@@ -250,23 +301,18 @@
                 timeFrozenText.classList.add('hidden');
             }
 
-            function createCardElement(value, cardCount) {
+            function createCardElement(value, type) {
                 const scene = document.createElement('div');
-                let cardSize = 'h-24 sm:h-28';
-                if (cardCount > 12) cardSize = 'h-20 sm:h-24';
-                if (cardCount > 20) cardSize = 'h-16 sm:h-20';
-                scene.className = `card-scene ${cardSize}`;
+                scene.className = `card-scene aspect-square`;
                 scene.dataset.value = value;
+                scene.dataset.type = type; // 'operation' or 'answer'
 
                 const inner = document.createElement('div');
                 inner.className = 'card-inner';
                 const faceFront = document.createElement('div');
                 faceFront.className = 'card-face bg-slate-600 hover:bg-slate-500 cursor-pointer';
                 const faceBack = document.createElement('div');
-                let textSize = 'text-lg sm:text-xl';
-                if (cardCount > 12) textSize = 'text-base sm:text-lg';
-                if (cardCount > 20) textSize = 'text-sm sm:text-base';
-                faceBack.className = `card-face card-face-back bg-slate-300 text-slate-900 ${textSize} font-bold p-1 text-center`;
+                faceBack.className = `card-face card-face-back bg-slate-300 text-slate-900 text-xs sm:text-lg md:text-xl font-bold p-1 text-center`;
                 faceBack.textContent = value;
                 
                 inner.appendChild(faceFront);
@@ -298,21 +344,37 @@
 
             function handleCardClick(card) {
                 if (lockBoard || card.classList.contains('is-flipped') || card.classList.contains('matched')) return;
-                card.classList.add('is-flipped');
-                flippedCards.push(card);
-                if (flippedCards.length === 2) {
-                    lockBoard = true;
-                    moves++;
-                    movesDisplay.textContent = `${moves} tentativas`;
-                    checkForMatch();
+
+                if (flippedCards.length === 0) {
+                    card.classList.add('is-flipped');
+                    flippedCards.push(card);
+                } else if (flippedCards.length === 1) {
+                    const firstCard = flippedCards[0];
+                    if (firstCard.dataset.type !== card.dataset.type) {
+                        card.classList.add('is-flipped');
+                        flippedCards.push(card);
+                        lockBoard = true;
+                        moves++;
+                        movesDisplay.textContent = `${moves} tentativas`;
+                        checkForMatch();
+                    }
                 }
             }
 
             function checkForMatch() {
                 const [card1, card2] = flippedCards;
                 let isMatch = false;
-                try { if (eval(card1.dataset.value.replace('x', '*')) == card2.dataset.value) isMatch = true; } catch (e) {}
-                if (!isMatch) try { if (eval(card2.dataset.value.replace('x', '*')) == card1.dataset.value) isMatch = true; } catch (e) {}
+                const operationCard = card1.dataset.type === 'operation' ? card1 : card2;
+                const answerCard = card1.dataset.type === 'answer' ? card1 : card2;
+
+                try {
+                    if (eval(operationCard.dataset.value.replace('x', '*')) == answerCard.dataset.value) {
+                        isMatch = true;
+                    }
+                } catch (e) {
+                    console.error("Erro ao avaliar expressão:", e);
+                }
+                
                 isMatch ? processMatch() : processMismatch();
             }
             
@@ -358,18 +420,20 @@
                 } else {
                     title = '⌛ Tempo Esgotado! ⌛';
                     message = 'Não foi desta vez. Que tal tentar de novo?';
-                    buttonHTML = `<button id="retry-level-btn" class="w-full text-lg mt-6 px-6 py-4 bg-yellow-500 hover:bg-yellow-600 rounded-lg font-semibold shadow-md">Tentar Novamente</button>`;
+                    buttonHTML = `<button id="retry-level-btn" class="w-full text-lg mt-6 px-6 py-4 bg-yellow-500 hover:bg-yellow-600 rounded-lg font-semibold shadow-md">Tentar Novamente</button><a href="https://forms.gle/puXe79khhiso7UJfA" target="_blank" class="block w-full text-lg mt-2 px-6 py-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold shadow-md text-center">Participar da Pesquisa</a>`;
                 }
 
                 modalTitle.textContent = title;
                 modalBody.innerHTML = `
-                    <p class="text-lg mb-2">${message}</p>
-                    <div class="grid grid-cols-2 gap-4 my-4">
-                        <div class="bg-slate-700 p-3 rounded-lg"><p class="text-sm text-slate-400">Pontuação Final</p><p class="text-2xl font-bold">${score}</p></div>
-                        <div class="bg-slate-700 p-3 rounded-lg"><p class="text-sm text-slate-400">Tentativas</p><p class="text-2xl font-bold">${moves}</p></div>
+                    <div id="end-game-view">
+                        <p class="text-lg mb-2">${message}</p>
+                        <div class="grid grid-cols-2 gap-4 my-4">
+                            <div class="bg-slate-700 p-3 rounded-lg"><p class="text-sm text-slate-400">Pontuação Final</p><p class="text-2xl font-bold">${score}</p></div>
+                            <div class="bg-slate-700 p-3 rounded-lg"><p class="text-sm text-slate-400">Tentativas</p><p class="text-2xl font-bold">${moves}</p></div>
+                        </div>
+                        ${buttonHTML}
+                        <button id="modal-main-menu-btn" class="w-full text-lg mt-2 px-6 py-4 bg-gray-600 hover:bg-gray-700 rounded-lg font-semibold shadow-md">Menu Principal</button>
                     </div>
-                    ${buttonHTML}
-                    <button id="modal-main-menu-btn" class="w-full text-lg mt-2 px-6 py-4 bg-gray-600 hover:bg-gray-700 rounded-lg font-semibold shadow-md">Menu Principal</button>
                 `;
                 startModal.classList.remove('hidden');
 
@@ -381,9 +445,15 @@
             function showMainMenu() {
                 gameContainer.classList.add('hidden');
                 modalTitle.textContent = 'Memória Matemática';
-                modalBody.innerHTML = `<button id="start-game-btn-2" class="w-full text-lg px-6 py-4 bg-green-500 hover:bg-green-600 rounded-lg font-semibold shadow-md">Iniciar Jogo</button>`;
+                mainMenuView.classList.remove('hidden');
+                instructionsView.classList.add('hidden');
+                const endGameView = modalBody.querySelector('#end-game-view');
+                if(endGameView) {
+                    modalBody.innerHTML = '';
+                    modalBody.appendChild(mainMenuView);
+                    modalBody.appendChild(instructionsView);
+                }
                 startModal.classList.remove('hidden');
-                document.getElementById('start-game-btn-2').addEventListener('click', () => startGame(0));
             }
 
             function showCombo(multiplier) {
@@ -430,22 +500,22 @@
                 lockBoard = true;
                 
                 const unmatchedCards = Array.from(document.querySelectorAll('.card-scene:not(.matched)'));
-                if (unmatchedCards.length < 2) { lockBoard = false; return; }
 
-                const card1 = unmatchedCards[Math.floor(Math.random() * unmatchedCards.length)];
-                let card2 = unmatchedCards[Math.floor(Math.random() * unmatchedCards.length)];
-                while (card1 === card2) {
-                    card2 = unmatchedCards[Math.floor(Math.random() * unmatchedCards.length)];
+                if (unmatchedCards.length === 0) {
+                    lockBoard = false;
+                    return; 
                 }
                 
-                card1.classList.add('is-flipped');
-                card2.classList.add('is-flipped');
-
+                unmatchedCards.forEach(card => card.classList.add('is-flipped'));
+                
                 setTimeout(() => {
-                    card1.classList.remove('is-flipped');
-                    card2.classList.remove('is-flipped');
-                    lockBoard = false;
-                }, 2000);
+                    unmatchedCards.forEach(card => {
+                        if (!flippedCards.includes(card)) {
+                            card.classList.remove('is-flipped');
+                        }
+                    });
+                    lockBoard = false; 
+                }, 3000); 
             }
 
             function handleFreezePower() {
@@ -462,8 +532,8 @@
                     updatePowerButtons();
                     timeBarInner.classList.remove('bg-sky-400');
                     timeFrozenText.classList.add('hidden');
-                    updateTimerBar(); // Recalcula a cor correta
-                }, 5000); // 5 segundos de congelamento
+                    updateTimerBar(); 
+                }, 5000); 
             }
 
             // --- INICIALIZAÇÃO ---
@@ -472,7 +542,18 @@
             mainMenuBtn.addEventListener('click', showMainMenu);
             powerRevealBtn.addEventListener('click', handleRevealPower);
             powerFreezeBtn.addEventListener('click', handleFreezePower);
+            howToPlayBtn.addEventListener('click', () => {
+                modalTitle.textContent = 'Como Jogar';
+                mainMenuView.classList.add('hidden');
+                instructionsView.classList.remove('hidden');
+            });
+            backToMenuBtn.addEventListener('click', () => {
+                modalTitle.textContent = 'Memória Matemática';
+                instructionsView.classList.add('hidden');
+                mainMenuView.classList.remove('hidden');
+            });
         });
     </script>
 </body>
 </html>
+
